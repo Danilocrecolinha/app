@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b12" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Nosso App" />
+
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="icon" href="icons/icon-192.png" />
+
+  <title>Nosso App</title>
+
+  <style>
+    :root{
+      --bg:#070711;
+      --card: rgba(255,255,255,.06);
+      --stroke: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.70);
+      --shadow: 0 20px 60px rgba(0,0,0,.55);
+      --r: 22px;
+      --pad: 18px;
+      --safeTop: env(safe-area-inset-top);
+      --safeBot: env(safe-area-inset-bottom);
+    }
+    *{ box-sizing:border-box; margin:0; padding:0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Arial, sans-serif;}
+    body{
+      background: radial-gradient(1200px 800px at 70% -10%, rgba(134,84,255,.22), transparent 60%),
+                  radial-gradient(900px 600px at 0% 100%, rgba(255,76,165,.18), transparent 55%),
+                  linear-gradient(180deg, #05050d 0%, #070711 60%, #09091a 100%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x:hidden;
+    }
+    .app{
+      max-width: 520px;
+      margin: 0 auto;
+      padding: calc(14px + var(--safeTop)) 14px calc(94px + var(--safeBot));
+    }
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px; margin-bottom:14px;
+    }
+    .brand{ display:flex; flex-direction:column; line-height:1.05; }
+    .brand b{ font-size:18px; letter-spacing:.2px; }
+    .brand span{ font-size:12px; color:var(--muted); margin-top:4px; }
+
+    .pill{
+      display:flex; align-items:center; gap:8px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      padding:10px 12px;
+      border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      user-select:none;
+    }
+    .dot{
+      width:9px; height:9px; border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,.2));
+      box-shadow: 0 0 0 6px rgba(255,255,255,.06);
+    }
+    .pill small{ color:var(--muted); font-size:12px; }
+
+    .card{
+      border: 1px solid var(--stroke);
+      background: var(--card);
+      border-radius: var(--r);
+      padding: var(--pad);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .hero{ position:relative; overflow:hidden; }
+    .hero h1{ font-size: 22px; letter-spacing:.2px; margin-bottom:8px; }
+    .hero p{ color: var(--muted); line-height:1.45; }
+    .glow{
+      position:absolute; inset:-60px -60px auto auto;
+      width:220px; height:220px; border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.30), rgba(255,255,255,.05), transparent 60%),
+                  radial-gradient(circle at 30% 30%, rgba(164,88,255,.35), transparent 60%),
+                  radial-gradient(circle at 30% 30%, rgba(255,90,160,.30), transparent 65%);
+      filter: blur(8px);
+      transform: rotate(20deg);
+      pointer-events:none;
+    }
+
+    .page{ display:none; }
+    .page.active{ display:block; animation: fadeIn .18s ease; }
+    @keyframes fadeIn{ from{ opacity:0; transform: translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+    .sectionTitle{
+      margin: 14px 0 10px;
+      color: rgba(255,255,255,.85);
+      font-size: 13px;
+      letter-spacing:.6px;
+      text-transform: uppercase;
+    }
+    .row{
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:12px;
+      padding: 14px 14px;
+      border-radius: 18px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+    }
+    .left{ display:flex; flex-direction:column; gap:6px; min-width: 0; }
+    .left b{ font-size:14px; }
+    .left small{ color:var(--muted); font-size:12px; line-height:1.25; }
+
+    .btn{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 14px;
+      cursor:pointer;
+      transition: transform .12s ease;
+      flex: 0 0 auto;
+      user-select:none;
+    }
+    .btn:active{ transform: scale(.98); }
+    .btnPrimary{
+      border-color: rgba(255,255,255,.18);
+      background: linear-gradient(135deg, rgba(164,88,255,.35), rgba(255,90,160,.25));
+    }
+
+    input, textarea{
+      width:100%;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 12px 12px;
+      outline:none;
+    }
+    textarea{ min-height: 96px; resize: vertical; }
+    .muted{ color: var(--muted); font-size: 12px; line-height:1.35; }
+
+    .tabs{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 0;
+      width: min(520px, calc(100% - 28px));
+      padding: 10px 10px calc(10px + var(--safeBot));
+      margin-bottom: 10px;
+      border-radius: 22px;
+      border: 1px solid var(--stroke);
+      background: rgba(10,10,20,.55);
+      box-shadow: 0 20px 70px rgba(0,0,0,.55);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      display:flex; gap:10px; justify-content:space-between;
+    }
+    .tab{
+      flex:1;
+      display:flex; align-items:center; justify-content:center;
+      padding: 12px 10px;
+      border-radius: 16px;
+      border: 1px solid transparent;
+      color: rgba(255,255,255,.78);
+      cursor:pointer;
+      user-select:none;
+      font-size: 13px;
+    }
+    .tab.active{
+      border-color: rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.95);
+    }
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: calc(98px + var(--safeBot));
+      background: rgba(0,0,0,.75);
+      border: 1px solid rgba(255,255,255,.16);
+      color: rgba(255,255,255,.95);
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events:none;
+      transition: opacity .2s ease, transform .2s ease;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 50;
+    }
+    .toast.show{ opacity:1; transform: translateX(-50%) translateY(-6px); }
+
+    /* Chat */
+    .chatHeader{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      margin-bottom: 10px;
+    }
+    .chip{
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: rgba(255,255,255,.82);
+    }
+    .chatBox{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding: 12px;
+      border-radius: 18px;
+      border:1px solid var(--stroke);
+      background: rgba(255,255,255,.03);
+      max-height: 52vh;
+      overflow:auto;
+    }
+    .msg{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      max-width: 86%;
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+    }
+    .msg.me{
+      margin-left:auto;
+      border-color: rgba(255,255,255,.18);
+      background: linear-gradient(135deg, rgba(164,88,255,.20), rgba(255,90,160,.14));
+    }
+    .msg small{ color: rgba(255,255,255,.65); font-size: 11px; line-height:1.2; }
+    .msg img{
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .chatComposer{
+      display:flex; gap:10px; align-items:flex-end; margin-top: 10px;
+    }
+    .chatComposer textarea{ min-height: 44px; max-height: 140px; }
+    .mini{
+      font-size: 12px;
+      color: rgba(255,255,255,.78);
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px dashed rgba(255,255,255,.18);
+      background: rgba(255,255,255,.03);
+    }
+
+    /* Profile */
+    .avatarRow{ display:flex; gap:12px; align-items:center; }
+    .avatar{
+      width: 58px; height:58px; border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      overflow:hidden;
+      display:flex; align-items:center; justify-content:center;
+      flex: 0 0 auto;
+    }
+    .avatar img{ width:100%; height:100%; object-fit:cover; }
+    .photoGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .photoCard{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      overflow:hidden;
+      padding: 10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .photoCard img{ width:100%; border-radius: 14px; border: 1px solid rgba(255,255,255,.10); }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <b>Nosso App</b>
+        <span>Chat + Perfil + Fotos (Supabase)</span>
+      </div>
+      <div class="pill">
+        <span class="dot"></span>
+        <small id="status">Carregando…</small>
+      </div>
+    </div>
+
+    <!-- AUTH / HOME -->
+    <section class="page active" data-page="chats">
+      <div class="card hero">
+        <div class="glow"></div>
+        <h1>Chats</h1>
+        <p>Loga e entra direto no nosso chat. App fechado só pra vocês dois.</p>
+      </div>
+
+      <div class="sectionTitle">Conta</div>
+      <div class="card">
+        <div id="loggedOut">
+          <b style="display:block; margin-bottom:8px;">Entrar por email</b>
+          <p class="muted" style="margin-bottom:10px;">
+            Vai chegar um link no email. Abre e volta pro app já logado.
+          </p>
+          <input id="email" type="email" placeholder="seuemail@exemplo.com" />
+          <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn btnPrimary" onclick="sendMagicLink()">Enviar link</button>
+            <button class="btn" onclick="toast('Se não chegar, vê spam/lixo eletrônico.')">Dica</button>
+          </div>
+        </div>
+
+        <div id="loggedIn" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+            <div class="left">
+              <b id="userEmail">Logado</b>
+              <small class="muted" id="userId"></small>
+            </div>
+            <button class="btn" onclick="logout()">Sair</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mini" style="margin-top:12px;">
+        Esse app é fechado no banco e no app: só esses 2 emails entram.
+      </div>
+    </section>
+
+    <!-- CHAT -->
+    <section class="page" data-page="chat">
+      <div class="card">
+        <div class="chatHeader">
+          <div class="left">
+            <b id="chatTitle">Nosso Chat</b>
+            <small class="muted" id="chatMeta">—</small>
+          </div>
+          <div class="chip" id="chatChip">Realtime</div>
+        </div>
+
+        <div class="chatBox" id="chatBox"></div>
+
+        <div class="chatComposer">
+          <textarea id="msgBody" placeholder="Mensagem…"></textarea>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <label class="btn" style="text-align:center;">
+              Foto
+              <input id="photoFile" type="file" accept="image/*" style="display:none;" />
+            </label>
+            <button class="btn btnPrimary" onclick="sendMessage()">Enviar</button>
+          </div>
+        </div>
+
+        <div class="muted" style="margin-top:10px;">
+          Se a foto ficar pesada, eu coloco compressão automática.
+        </div>
+      </div>
+    </section>
+
+    <!-- FOTOS -->
+    <section class="page" data-page="fotos">
+      <div class="card">
+        <h1>Fotos</h1>
+        <p class="muted" style="margin-top:8px;">
+          Feed de fotos do nosso chat.
+        </p>
+
+        <div class="sectionTitle">Upload rápido</div>
+        <div class="row">
+          <div class="left">
+            <b>Mandar foto pro chat</b>
+            <small>Entra como mensagem com imagem.</small>
+          </div>
+          <label class="btn btnPrimary" style="text-align:center;">
+            Escolher
+            <input id="photoQuick" type="file" accept="image/*" style="display:none;" />
+          </label>
+        </div>
+
+        <div class="sectionTitle">Feed</div>
+        <div class="photoGrid" id="photoGrid"></div>
+      </div>
+    </section>
+
+    <!-- PERFIL -->
+    <section class="page" data-page="perfil">
+      <div class="card">
+        <h1>Perfil</h1>
+        <p class="muted" style="margin-top:8px;">
+          Seu nome e avatar (salvo no banco + storage).
+        </p>
+
+        <div class="sectionTitle">Seu perfil</div>
+        <div class="avatarRow">
+          <div class="avatar" id="avatarBox"></div>
+          <div style="flex:1;">
+            <input id="displayName" placeholder="Seu nome" />
+            <div style="display:flex; gap:10px; margin-top:10px;">
+              <button class="btn btnPrimary" onclick="saveProfile()">Salvar</button>
+              <label class="btn">
+                Trocar avatar
+                <input id="avatarFile" type="file" accept="image/*" style="display:none;" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="mini" style="margin-top:12px;">
+          Depois eu coloco o perfil da outra pessoa aqui também, pra ficar chave.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <nav class="tabs" aria-label="Navegação">
+    <div class="tab active" data-tab="chats" onclick="go('chats')">Chats</div>
+    <div class="tab" data-tab="chat" onclick="go('chat')">Chat</div>
+    <div class="tab" data-tab="fotos" onclick="go('fotos')">Fotos</div>
+    <div class="tab" data-tab="perfil" onclick="go('perfil')">Perfil</div>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ====== COLE AQUI ======
+    const SUPABASE_URL = "https://rybgtclejdrilreatnpo.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_K0L0nS0vgyD5WMmqG_ocnA_VWBFlL7F";
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const $ = (s) => document.querySelector(s);
+
+    let activeConversationId = null;
+    let realtimeChannel = null;
+
+    // ===== WHITELIST =====
+    const ALLOWED = [
+      "danilima13-santos@hotmail.com",
+      "danilima13-santoss@hotmail.com"
+    ].map(e => e.toLowerCase());
+
+    function isAllowedEmail(email){
+      return !!email && ALLOWED.includes(String(email).toLowerCase());
+    }
+
+    const COUPLE_CHAT_KEY = "couple_chat_id";
+
+    function go(page){
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelector(`.page[data-page="${page}"]`).classList.add('active');
+
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.tab[data-tab="${page}"]`).classList.add('active');
+
+      history.replaceState({}, "", `#${page}`);
+    }
+
+    // Toast
+    let toastTimer = null;
+    function toast(msg){
+      const el = $('#toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(()=> el.classList.remove('show'), 1700);
+    }
+
+    function setStatus(){
+      $('#status').textContent = navigator.onLine ? 'Online' : 'Offline';
+    }
+    window.addEventListener('online', setStatus);
+    window.addEventListener('offline', setStatus);
+
+    async function getUser(){
+      const { data } = await supabase.auth.getSession();
+      return data.session?.user || null;
+    }
+
+    // ===== AUTH =====
+    async function sendMagicLink(){
+      const email = $('#email').value.trim();
+      if(!email) return toast('Coloca um email aí, pô.');
+
+      const redirectTo = window.location.origin + window.location.pathname;
+
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: redirectTo }
+      });
+
+      if(error) return toast('Erro no login: ' + error.message);
+      toast('Link enviado. Vai lá no email e abre.');
+    }
+
+    async function logout(){
+      await supabase.auth.signOut();
+      toast('Saiu.');
+      activeConversationId = null;
+      stopRealtime();
+      renderAuth();
+      renderChat([]);
+      renderPhotos([]);
+      renderProfile(null);
+      go('chats');
+    }
+
+    async function renderAuth(){
+      const user = await getUser();
+
+      if(user){
+        // trava whitelist
+        if(!isAllowedEmail(user.email)){
+          await supabase.auth.signOut();
+          toast('Esse app é fechado. Email não autorizado.');
+          $('#loggedOut').style.display = 'block';
+          $('#loggedIn').style.display = 'none';
+          return;
+        }
+
+        $('#loggedOut').style.display = 'none';
+        $('#loggedIn').style.display = 'block';
+        $('#userEmail').textContent = user.email || 'Logado';
+        $('#userId').textContent = 'user_id: ' + user.id;
+
+        await ensureProfile();
+
+        // chat único automático
+        try{
+          const cid = await ensureCoupleChat();
+          activeConversationId = cid;
+
+          $('#chatTitle').textContent = 'Nosso Chat';
+          $('#chatMeta').textContent = `id: ${cid.slice(0,8)}…`;
+
+          await loadMessages();
+          await loadPhotos();
+          startRealtime();
+
+          go('chat');
+          toast('Entrou no nosso chat.');
+        }catch(e){
+          console.log(e);
+          toast('Deu ruim criando o chat: ' + (e.message || e));
+        }
+
+      }else{
+        $('#loggedOut').style.display = 'block';
+        $('#loggedIn').style.display = 'none';
+      }
+    }
+
+    async function ensureCoupleChat(){
+      const user = await getUser();
+      if(!user) return null;
+
+      // 1) tenta pelo localStorage
+      let cid = localStorage.getItem(COUPLE_CHAT_KEY);
+      if(cid){
+        const { data, error } = await supabase.from('conversations').select('id,title').eq('id', cid).maybeSingle();
+        if(!error && data?.id){
+          await ensureMember(cid, user.id);
+          return cid;
+        }
+        localStorage.removeItem(COUPLE_CHAT_KEY);
+      }
+
+      // 2) tenta achar pelo título
+      const { data: found, error: fErr } = await supabase
+        .from('conversations')
+        .select('id,title')
+        .eq('title', 'Nosso Chat')
+        .limit(1);
+
+      if(!fErr && found?.length){
+        cid = found[0].id;
+        localStorage.setItem(COUPLE_CHAT_KEY, cid);
+        await ensureMember(cid, user.id);
+        return cid;
+      }
+
+      // 3) cria
+      const { data: convo, error } = await supabase
+        .from('conversations')
+        .insert([{ title: 'Nosso Chat', is_dm: true, created_by: user.id }])
+        .select('id,title')
+        .single();
+
+      if(error) throw error;
+
+      cid = convo.id;
+      localStorage.setItem(COUPLE_CHAT_KEY, cid);
+      await ensureMember(cid, user.id);
+      return cid;
+    }
+
+    async function ensureMember(conversation_id, user_id){
+      const { error } = await supabase
+        .from('conversation_members')
+        .insert([{ conversation_id, user_id }], { returning: 'minimal' });
+
+      if(error){
+        const msg = String(error.message || '').toLowerCase();
+        // ignora "já existe"
+        if(!msg.includes('duplicate') && !msg.includes('unique')) throw error;
+      }
+    }
+
+    // ===== PROFILE =====
+    async function ensureProfile(){
+      const user = await getUser();
+      if(!user) return;
+
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
+      if(error) return toast('Erro perfil: ' + error.message);
+
+      if(!data){
+        const fallback = user.email ? user.email.split('@')[0] : 'Sem nome';
+        const { error: e2 } = await supabase.from('profiles').insert([{ id: user.id, display_name: fallback }]);
+        if(e2) return toast('Erro criando perfil: ' + e2.message);
+      }
+
+      await loadProfile();
+    }
+
+    async function loadProfile(){
+      const user = await getUser();
+      if(!user) return;
+
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      if(error) return toast('Erro perfil: ' + error.message);
+      renderProfile(data);
+    }
+
+    function renderProfile(p){
+      const box = $('#avatarBox');
+      box.innerHTML = '';
+      if(!p){
+        $('#displayName').value = '';
+        box.textContent = '—';
+        return;
+      }
+      $('#displayName').value = p.display_name || '';
+      if(p.avatar_url){
+        const img = document.createElement('img');
+        img.src = p.avatar_url;
+        img.alt = 'avatar';
+        box.appendChild(img);
+      }else{
+        box.textContent = (p.display_name || 'Você').slice(0,1).toUpperCase();
+      }
+    }
+
+    async function saveProfile(){
+      const user = await getUser();
+      if(!user) return toast('Loga primeiro.');
+
+      const display_name = $('#displayName').value.trim() || 'Sem nome';
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ display_name })
+        .eq('id', user.id);
+
+      if(error) return toast('Erro salvando: ' + error.message);
+      toast('Perfil salvo.');
+      await loadProfile();
+    }
+
+    // avatar upload
+    $('#avatarFile')?.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if(!file) return;
+      const user = await getUser();
+      if(!user) return toast('Loga primeiro.');
+
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const path = `${user.id}/${Date.now()}.${ext}`;
+
+      toast('Subindo avatar...');
+      const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+      if(upErr) return toast('Erro upload: ' + upErr.message);
+
+      const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+      const avatar_url = data.publicUrl;
+
+      const { error } = await supabase.from('profiles').update({ avatar_url }).eq('id', user.id);
+      if(error) return toast('Erro avatar: ' + error.message);
+
+      toast('Avatar atualizado.');
+      await loadProfile();
+    });
+
+    // ===== MENSAGENS =====
+    async function loadMessages(){
+      const user = await getUser();
+      if(!user || !activeConversationId) return renderChat([]);
+
+      const { data, error } = await supabase
+        .from('messages')
+        .select('id, sender_id, body, photo_url, created_at')
+        .eq('conversation_id', activeConversationId)
+        .order('created_at', { ascending: true })
+        .limit(200);
+
+      if(error) return toast('Erro msgs: ' + error.message);
+      renderChat(data || []);
+    }
+
+    function renderChat(msgs){
+      const box = $('#chatBox');
+      box.innerHTML = '';
+
+      if(!msgs.length){
+        box.innerHTML = `<div class="muted">Sem mensagens ainda. Manda a primeira.</div>`;
+        return;
+      }
+
+      getUser().then(user => {
+        for(const m of msgs){
+          const div = document.createElement('div');
+          div.className = 'msg' + (user && m.sender_id === user.id ? ' me' : '');
+          const time = new Date(m.created_at).toLocaleString('pt-BR');
+          const safeBody = m.body ? escapeHtml(m.body) : '';
+          div.innerHTML = `
+            ${m.photo_url ? `<img src="${m.photo_url}" alt="foto" />` : ``}
+            ${safeBody ? `<div>${safeBody}</div>` : ``}
+            <small>${time}</small>
+          `;
+          box.appendChild(div);
+        }
+        box.scrollTop = box.scrollHeight;
+      });
+    }
+
+    async function sendMessage(){
+      const user = await getUser();
+      if(!user) return toast('Loga primeiro.');
+      if(!activeConversationId) return toast('Chat não pronto ainda. Volta em Chats.');
+
+      const body = $('#msgBody').value.trim();
+      const file = $('#photoFile').files?.[0] || null;
+
+      if(!body && !file) return toast('Manda uma mensagem ou uma foto.');
+
+      let photo_url = null;
+
+      if(file){
+        toast('Subindo foto...');
+        const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+        const path = `${activeConversationId}/${user.id}/${Date.now()}.${ext}`;
+
+        const { error: upErr } = await supabase.storage.from('chat_photos').upload(path, file, { upsert: false });
+        if(upErr) return toast('Erro foto: ' + upErr.message);
+
+        const { data } = supabase.storage.from('chat_photos').getPublicUrl(path);
+        photo_url = data.publicUrl;
+
+        // salva feed
+        const { error: pErr } = await supabase.from('photos').insert([{
+          conversation_id: activeConversationId,
+          user_id: user.id,
+          url: photo_url
+        }]);
+        if(pErr) console.log('foto feed error', pErr.message);
+
+        $('#photoFile').value = '';
+      }
+
+      const { error } = await supabase.from('messages').insert([{
+        conversation_id: activeConversationId,
+        sender_id: user.id,
+        body: body || null,
+        photo_url
+      }]);
+
+      if(error) return toast('Erro enviar: ' + error.message);
+
+      $('#msgBody').value = '';
+      await loadMessages();
+      await loadPhotos();
+    }
+
+    // Quick upload nas Fotos
+    $('#photoQuick')?.addEventListener('change', async (e) => {
+      const f = e.target.files?.[0];
+      if(!f) return;
+      $('#photoFile').files = e.target.files;
+      go('chat');
+      $('#msgBody').value = '';
+      await sendMessage();
+      $('#photoQuick').value = '';
+    });
+
+    // ===== FOTOS =====
+    async function loadPhotos(){
+      const user = await getUser();
+      if(!user || !activeConversationId) return renderPhotos([]);
+
+      const { data, error } = await supabase
+        .from('photos')
+        .select('id, url, caption, created_at')
+        .eq('conversation_id', activeConversationId)
+        .order('created_at', { ascending: false })
+        .limit(60);
+
+      if(error) return toast('Erro fotos: ' + error.message);
+      renderPhotos(data || []);
+    }
+
+    function renderPhotos(items){
+      const grid = $('#photoGrid');
+      grid.innerHTML = '';
+
+      if(!activeConversationId){
+        grid.innerHTML = `<div class="mini">Abre o app e loga pra carregar o chat.</div>`;
+        return;
+      }
+
+      if(!items.length){
+        grid.innerHTML = `<div class="mini">Sem fotos ainda. Manda a primeira no chat.</div>`;
+        return;
+      }
+
+      for(const p of items){
+        const card = document.createElement('div');
+        card.className = 'photoCard';
+        card.innerHTML = `
+          <img src="${p.url}" alt="foto" />
+          <div class="muted">${new Date(p.created_at).toLocaleString('pt-BR')}</div>
+        `;
+        grid.appendChild(card);
+      }
+    }
+
+    // ===== REALTIME =====
+    function stopRealtime(){
+      if(realtimeChannel){
+        supabase.removeChannel(realtimeChannel);
+        realtimeChannel = null;
+      }
+    }
+
+    function startRealtime(){
+      stopRealtime();
+      if(!activeConversationId) return;
+
+      realtimeChannel = supabase.channel('chat_' + activeConversationId)
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${activeConversationId}` },
+          () => { loadMessages(); }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'photos', filter: `conversation_id=eq.${activeConversationId}` },
+          () => { loadPhotos(); }
+        )
+        .subscribe((status) => {
+          $('#chatChip').textContent = status === 'SUBSCRIBED' ? 'Realtime ON' : 'Realtime…';
+        });
+    }
+
+    function escapeHtml(str){
+      return (str || '').replace(/[&<>"']/g, (m) => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;"
+      }[m]));
+    }
+
+    // ===== INIT =====
+    window.addEventListener('load', async () => {
+      setStatus();
+
+      const hash = location.hash.replace('#','');
+      if(hash) go(hash);
+
+      if('serviceWorker' in navigator){
+        try{ await navigator.serviceWorker.register('./sw.js'); }catch(e){ console.log(e); }
+      }
+
+      supabase.auth.onAuthStateChange(() => { renderAuth(); });
+
+      $('#photoFile')?.addEventListener('change', () => toast('Foto pronta pra enviar.'));
+
+      await renderAuth();
+      await loadProfile();
+    });
+  </script>
+</body>
+</html>
